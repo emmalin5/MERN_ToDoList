@@ -1,0 +1,27 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+@import "tailwindcss";
+
+
+/* Custom thin scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+   
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 3px;
+   
+
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  .custom-time-picker .ant-picker {
+    @apply border-blue-500 border p-2 text-gray-500; 
+  }
+  
