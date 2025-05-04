@@ -33,6 +33,8 @@ export const getDataTasks = async (userId = '6816484c176e50c4f0251015') => {
 // Update Task
 export const updateTask = async (taskId, updatedData) => {
   try {
+    console.log("Updating task with ID:", taskId, updatedData);
+    updatedData.userId = "6816484c176e50c4f0251015";
     const response = await axios.put(`http://localhost:4000/api/tasks/${taskId}`, updatedData);
     return response.data;
   } catch (error) {
@@ -42,9 +44,15 @@ export const updateTask = async (taskId, updatedData) => {
 };
 
 // Delete Task
-export const deleteTask = async (taskId) => {
+
+export const deleteTask = async (taskId, userId) => {
   try {
-    const response = await axios.delete(`http://localhost:4000/api/tasks/${taskId}`);
+    console.log("This is in delete Task", taskId);
+    console.log("User ID:", userId);
+    const response = await axios.delete(`http://localhost:4000/api/tasks/${taskId}`, {
+      data: { userId: userId } // this is the fix
+    });
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error deleting task:", error);

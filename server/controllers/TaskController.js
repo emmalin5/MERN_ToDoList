@@ -1,5 +1,6 @@
 const Task = require("../models/Task");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 
 exports.createTask = async (req, res) => {
   try {
@@ -37,21 +38,39 @@ exports.getTasks = async (req, res) => {
 
 exports.updateTask = async (req, res) => {
   try {
-    const task = await Task.findOneAndUpdate(
-      { _id: req.params.id, userId: req.body.userId },
-      req.body,
-      { new: true }
+    const taskId = req.params.id;
+    const userId = req.body.userId;
+
+    // ✅ Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+      return res.status(400).json({ error: "Invalid task ID" });
+    }
+
+    // ✅ Find and update the task
+    const updatedTask = await Task.findOneAndUpdate(
+      { _id: taskId, userId }, // Match both taskId and userId
+      req.body,                // Update with all data from body
+      { new: true }            // Return updated task
     );
-    if (!task) return res.status(404).json({ message: "Task not found" });
-    res.json(task);
+
+    // ✅ Check if task exists
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task not found or unauthorized" });
+    }
+
+    // ✅ Send updated task back
+    res.json(updatedTask);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error updating task:", err.message);
+    res.status(500).json({ error: "Server error. Failed to update task." });
   }
 };
-
 exports.deleteTask = async (req, res) => {
   try {
+    console.log("Deleting task with ID:", req.params.id);
+    console.log("User ID:", req);
     const result = await Task.deleteOne({ _id: req.params.id, userId: req.body.userId });
+    console.log(result);
     res.json({ success: result.deletedCount > 0 });
   } catch (err) {
     res.status(500).json({ error: err.message });

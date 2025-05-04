@@ -40,6 +40,7 @@ const TaskModal = ({ isOpen, onClose, onSave, onDelete, task }) => {
   }, [task, isOpen]);
 
   const handleSave = () => {
+    console.log("Handle Save Task Id" ,task?._id);
     const taskData = {
       title: taskName,
       description: taskDescription,
@@ -49,15 +50,17 @@ const TaskModal = ({ isOpen, onClose, onSave, onDelete, task }) => {
       repeat,
       status,
       reminder,
+      
     };
 
-    onSave(taskData, task?.index);
+    onSave(taskData, task?._id);
+    
     onClose();
   };
 
   const handleDelete = () => {
     if (isEditMode && onDelete) {
-      alert("Are you sure you want to delete this task?");
+      alert("Are you sure you want to delete this task?", task.index);
       onDelete(task.index);
       onClose();
     }

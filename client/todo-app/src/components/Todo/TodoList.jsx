@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Card from "../Todo/Card";
 import TaskModal from "../Todo/TodoModal";
-import { getDataTasks } from "../../features/todo/todoService";
+import { getDataTasks, deleteTask, updateTask, createDataTask } from "../../features/todo/todoService";
 
 const TodoList = () => {
   const [tasks, setTasks] = useState([]);
@@ -46,22 +46,36 @@ const TodoList = () => {
     setIsModalOpen(true);
   };
 
-  const handleSaveTask = (taskData, index) => {
-    if (index !== undefined) {
-      const updatedTasks = [...tasks];
-      updatedTasks[index] = { ...updatedTasks[index], ...taskData };
-      setTasks(updatedTasks);
-    } else {
-      setTasks([
-        ...tasks,
-        { ...taskData, status: "pending", colorIndex: tasks.length },
-      ]);
+  const handleSaveTask = async (taskData, taskId) => {
+    try {
+      console.log("Task Id in save:", taskId);
+      if (taskId) {
+        //  Update task via PUT
+        const updatedTask = await updateTask(taskId, taskData);
+        setTasks(prev => prev.map(task =>
+          task._id === taskId ? { ...updatedTask } : task
+        ));
+      } else {
+        //  Create task via POST
+        await createDataTask(taskData, userId);
+        const tasksData = await getDataTasks(userId);
+        setTasks(tasksData);
+      }
+    } catch (error) {
+      console.error("Error saving task:", error);
     }
   };
+  
 
-  const handleDeleteTask = (index) => {
-    const updated = tasks.filter((_, i) => i !== index);
-    setTasks(updated);
+  const handleDeleteTask = async(index) => {
+    try{
+      console.log(tasks[index]._id);
+      console.log("User ID:", userId);
+      await deleteTask(tasks[index]._id, userId);
+      setTasks(tasks.filter((_, i) => i !== index));
+    }catch(error){
+      console.error("Error deleting task:", error);
+    }
   };
 
   return (
@@ -72,7 +86,7 @@ const TodoList = () => {
           <Card
             key={task._id || index}
             title={task.title}
-            time={task.time}
+            time={task.startTime}
             status={task.status}
             colorIndex={task.colorIndex}
             onClick={() => openEditModal(task, index)}
