@@ -1,7 +1,11 @@
+import React from 'react';
+import { Layout, Typography, Row, Col, Calendar } from 'antd';
 import Header from '../../components/Layout/Header';
 import Footer from '../../components/Layout/Footer';
 import TodoList from '../../components/Todo/TodoList';
-import { Calendar } from 'antd';
+
+const { Content } = Layout;
+const { Text } = Typography;
 
 const onPanelChange = (value, mode) => {
   console.log(value.format('YYYY-MM-DD'), mode);
@@ -9,24 +13,27 @@ const onPanelChange = (value, mode) => {
 
 function TodoPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <Layout style={{ minHeight: '100vh' }}>
       <Header />
-      <main className="flex-grow max-w-5xl mx-auto justify-between">
-        <div className="flex flex-col md:flex-row gap-8 justify-between">
-          {/* Left side: Todo List */}
-          <div className="md:w-2/3 w-full">
-            <p className="text-l text-gray-400 font-semibold pt-4">Sat 3 May  </p>
+
+      <Content style={{ padding: '24px', maxWidth: 1200, margin: '0 auto', flex: 1 }}>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} md={16}>
+            <Text type="secondary" style={{ fontSize: '16px', fontWeight: 500 }}>
+              Sat 3 May
+            </Text>
             <TodoList />
-          </div>
+          </Col>
 
           {/* Right side: Calendar */}
-          <div className="md:w-1/3 w-full p-4">
+          <Col xs={24} md={8}>
             <Calendar fullscreen={false} onPanelChange={onPanelChange} />
-          </div>
-        </div>
-      </main>
+          </Col>
+        </Row>
+      </Content>
+
       <Footer />
-    </div>
+    </Layout>
   );
 }
 

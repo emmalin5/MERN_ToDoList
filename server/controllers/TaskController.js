@@ -1,61 +1,59 @@
-const Task = require('../models/Task');
+const Task = require("../models/Task");
+const User = require("../models/User");
 
-exports.getAllTasks = async (req, res) => {
-    try{
-        const tasks = await Task.find();
-        res.json(tasks);
-    }catch(err){
-        console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
-    }
-    
-}
-
-exports.addTask = async (req, res) => {
+exports.createTask = async (req, res) => {
+  try {
     console.log(req.body);
-    const task = new Task({
-        title: req.body.title,
-        description: req.body.description,
-        completed: req.body.completed,
-        createdAt: Date.now(),
-       
-    });
-    try{
-        const savedTask = await task.save();
-        res.json(savedTask);
-    }catch(err){
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-}
+    console.log(req.body.userId);
+    const user = await User.findById(req.body.userId);
 
+    if(!user){
+        console.log("USER NOT EXIST");
+    }
+    console.log("USER EXIST", user);
+    const task = new Task({ ...req.body, userId: req.body.userId });
+    await task.save();
+    res.status(201).json(task);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+
+exports.getTasks = async (req, res) => {
+  try {
+    console.log("Query params:", req.query);
+    const { userId } = req.query;
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
+    }
+    const tasks = await Task.find({ userId });
+    res.json(tasks);
+  } catch (err) {
+    console.error('Error fetching tasks:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
 
 exports.updateTask = async (req, res) => {
-    const body = req.body;
-    console.log(body);
-    try{
-        const task = await Task.findById(req.params.taskId);
-        task.title = req.body.title;
-        task.description = req.body.description;
-        task.completed = req.body.completed;
-        task.updateTask = Date.now();
-        const updatedTask = await task.save();
-        res.json(updatedTask);
-    }catch(err){
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-}
+  try {
+    const task = await Task.findOneAndUpdate(
+      { _id: req.params.id, userId: req.body.userId },
+      req.body,
+      { new: true }
+    );
+    if (!task) return res.status(404).json({ message: "Task not found" });
+    res.json(task);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.deleteTask = async (req, res) => {
-    try{
-        const deletedTask = await Task.findByIdAndDelete(req.params.taskId);
-        res.status(200).json({ message: 'Task deleted successfully' });
-
-    }catch(err){
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-
-}
-
+  try {
+    const result = await Task.deleteOne({ _id: req.params.id, userId: req.body.userId });
+    res.json({ success: result.deletedCount > 0 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
