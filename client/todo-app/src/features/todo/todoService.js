@@ -2,16 +2,18 @@ import axios from "axios";
 
 // Create Task
 export const createDataTask = async (taskData, userId) => {
-    try {
-      const response = await axios.post('http://localhost:4000/api/tasks', {
-        ...taskData,
-        userId: userId
-      });
-      console.log(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  try {
+    const response = await axios.post('http://localhost:4000/api/tasks', {
+      ...taskData,
+      userId: userId
+    });
+    console.log(response.data);
+    return response.data; // Return created task
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
 
 // Get Tasks
 export const getDataTasks = async (userId = '6816484c176e50c4f0251015') => {

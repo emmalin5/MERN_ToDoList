@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 
 exports.createTask = async (req, res) => {
   try {
+    console.log("Request body:", req.body);
     console.log(req.body);
     console.log(req.body.userId);
     const user = await User.findById(req.body.userId);

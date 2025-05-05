@@ -50,11 +50,16 @@ const TaskModal = ({ isOpen, onClose, onSave, onDelete, task }) => {
       repeat,
       status,
       reminder,
-      
     };
-
-    onSave(taskData, task?._id);
-    
+    if (task?._id) {
+      // Update existing task
+      console.log("Handle Save Task Id" ,task._id);
+      onSave(taskData, task._id);
+    } else {
+      console.log("Handle Save Task Id" ,task._id);
+      // Create new task
+      onSave(taskData, null); // or you can pass a default value, e.g. 0
+    }
     onClose();
   };
 
