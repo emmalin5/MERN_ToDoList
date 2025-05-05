@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Input, DatePicker, TimePicker, Button, Space } from "antd";
 import { BellOutlined, RedoOutlined } from "@ant-design/icons";
 import moment from "moment";
+
 const { TextArea } = Input;
 
 const TaskModal = ({ isOpen, onClose, onSave, onDelete, task }) => {
@@ -13,70 +14,74 @@ const TaskModal = ({ isOpen, onClose, onSave, onDelete, task }) => {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
   const [repeat, setRepeat] = useState(false);
-  const [status, setStatus] = useState(false);
+  const [status, setStatus] = useState("pending");
   const [reminder, setReminder] = useState(false);
 
   useEffect(() => {
     if (isEditMode && task) {
       setTaskName(task.title || "");
       setTaskDescription(task.description || "");
-      setDate(task.date ? moment(task.date) : null); // Convert to moment
+      setDate(task.date ? moment(task.date) : null);
       setStartTime(task.startTime ? moment(task.startTime, "HH:mm") : null);
       setEndTime(task.endTime ? moment(task.endTime, "HH:mm") : null);
       setRepeat(task.repeat || false);
-      setStatus(task.status || "pending"); // Use string enum values
+      setStatus(task.status || "pending");
       setReminder(task.reminder || false);
     } else {
-      // Reset form
-      setTaskName("");
-      setTaskDescription("");
-      setDate(null);
-      setStartTime(null);
-      setEndTime(null);
-      setRepeat(false);
-      setStatus("pending");
-      setReminder(false);
+      resetFields();
     }
   }, [task, isOpen]);
 
-  const handleSave = () => {
-    console.log("Handle Save Task Id" ,task?._id);
-    const taskData = {
-      title: taskName,
-      description: taskDescription,
-      date: date ? date.toISOString() : null,
-      startTime: startTime ? startTime.format("HH:mm") : null,
-      endTime: endTime ? endTime.format("HH:mm") : null,
-      repeat,
-      status,
-      reminder,
-    };
-    if (task?._id) {
-      // Update existing task
-      console.log("Handle Save Task Id" ,task._id);
-      onSave(taskData, task._id);
-    } else {
-      console.log("Handle Save Task Id" ,task._id);
-      // Create new task
-      onSave(taskData, null); // or you can pass a default value, e.g. 0
-    }
+  const resetFields = () => {
+    setTaskName("");
+    setTaskDescription("");
+    setDate(null);
+    setStartTime(null);
+    setEndTime(null);
+    setRepeat(false);
+    setStatus("pending");
+    setReminder(false);
+  };
+
+  const buildTaskData = () => ({
+    title: taskName,
+    description: taskDescription,
+    date: date ? date.toISOString() : null,
+    startTime: startTime ? startTime.format("HH:mm") : null,
+    endTime: endTime ? endTime.format("HH:mm") : null,
+    repeat,
+    status,
+    reminder,
+  });
+
+  const handleCreate = () => {
+    const taskData = buildTaskData();
+    onSave(taskData);
+    onClose();
+  };
+
+  const handleUpdate = () => {
+    const taskData = buildTaskData();
+    onSave(taskData, task._id);
     onClose();
   };
 
   const handleDelete = () => {
     if (isEditMode && onDelete) {
-      alert("Are you sure you want to delete this task?", task.index);
-      onDelete(task.index);
-      onClose();
+      if (window.confirm("Are you sure you want to delete this task?")) {
+        onDelete(task.index); // Pass _id if your logic needs it
+        onClose();
+      }
     }
   };
 
   return (
     <Modal
-      title={isEditMode ? "Update Task" : "Create Task"}
+      title={isEditMode ? "Edit Task" : "Create Task"}
       open={isOpen}
       onCancel={onClose}
-      footer={null}>
+      footer={null}
+    >
       <Space direction="vertical" style={{ width: "100%" }} size="middle">
         <Input
           value={taskName}
@@ -93,17 +98,17 @@ const TaskModal = ({ isOpen, onClose, onSave, onDelete, task }) => {
           <DatePicker
             popupClassName="!z-[9999]"
             value={date}
-            onChange={(value) => setDate(value)}
+            onChange={setDate}
           />
           <TimePicker
             placeholder="Start Time"
             value={startTime}
-            onChange={(value) => setStartTime(value)}
+            onChange={setStartTime}
           />
           <TimePicker
             placeholder="End Time"
             value={endTime}
-            onChange={(value) => setEndTime(value)}
+            onChange={setEndTime}
           />
         </Space>
         <Space wrap size="middle">
@@ -114,7 +119,8 @@ const TaskModal = ({ isOpen, onClose, onSave, onDelete, task }) => {
               color: reminder ? "#fff" : undefined,
             }}
             icon={<BellOutlined />}
-            onClick={() => setReminder((prev) => !prev)}>
+            onClick={() => setReminder(!reminder)}
+          >
             Reminder
           </Button>
           <Button
@@ -124,22 +130,22 @@ const TaskModal = ({ isOpen, onClose, onSave, onDelete, task }) => {
               color: repeat ? "#fff" : undefined,
             }}
             icon={<RedoOutlined />}
-            onClick={() => setRepeat((prev) => !prev)}>
+            onClick={() => setRepeat(!repeat)}
+          >
             Repeat
           </Button>
         </Space>
 
         <Space style={{ justifyContent: "right", width: "100%" }}>
           {isEditMode && (
-            <Button
-              type="primary"
-              style={{ paddingInline: "30px" }}
-              danger
-              onClick={handleDelete}>
+            <Button type="primary" danger onClick={handleDelete}>
               Delete
             </Button>
           )}
-          <Button type="primary" onClick={handleSave}>
+          <Button
+            type="primary"
+            onClick={isEditMode ? handleUpdate : handleCreate}
+          >
             {isEditMode ? "Save Changes" : "Create Task"}
           </Button>
         </Space>

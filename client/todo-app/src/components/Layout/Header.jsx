@@ -39,13 +39,7 @@ const AppHeader = () => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={showModal}
-          >
-            Add New Task
-          </Button>
+         
 
           <BellOutlined style={{ fontSize: '18px' }} />
 
